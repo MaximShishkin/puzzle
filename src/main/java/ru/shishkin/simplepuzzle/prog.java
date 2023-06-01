@@ -1,4 +1,4 @@
-package ru;
+package ru.shishkin.simplepuzzle;
 
 import javax.swing.*;
 import java.awt.*;
