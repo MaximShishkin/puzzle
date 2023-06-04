@@ -4,19 +4,18 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
 
 public class Panel extends JPanel {
     private int x = 3, y = 3;
     private int napr = 2;
     private Image img;
-    JButton btn1, btn2, btn3;
-    Image[] mas = new Image[15];
-    JLabel[] txt;
-    int kol = 0;
-    int l = 0;
-    Timer timerUpdate;
-    int[][] data = {
+    private JButton btn1, btn2, btn3;
+    private Image[] mas = new Image[15];
+    private JLabel[] txt;
+    private int kol = 0;
+    private int l = 0;
+    private Timer timerUpdate;
+    private int[][] data = {
             {1, 2, 3, 4},
             {5, 6, 7, 8},
             {9, 10, 11, 12},
@@ -34,6 +33,7 @@ public class Panel extends JPanel {
             int tX = e.getX();
             int tY = e.getY();
             int k = 1;
+            
             for (int i = 0; i < 4; i++) {
                 for (int j = 0; j < 4; j++) {
                     if (tX == (10 + i * 70)) {
@@ -58,7 +58,6 @@ public class Panel extends JPanel {
         }
     }
 
-
     public Panel() {
         setLayout(null);
         btn1 = new JButton("START");
@@ -69,8 +68,8 @@ public class Panel extends JPanel {
                 timerUpdate.stop();
                 for (int i = 0; i < 10000; i++) {
                     int t = (int) (Math.random() * 4);
-                    if ((t == 0) && (y > 0))//up
-                    {
+
+                    if ((t == 0) && (y > 0)) {
                         data[y][x] = data[y - 1][x];
                         data[y - 1][x] = 0;
                         y--;
@@ -121,10 +120,10 @@ public class Panel extends JPanel {
         addMouseMotionListener(new myMouse2());
 
         try {
-            img = ImageIO.read(new File("./fon.png"));
+            img = ImageIO.read(getClass().getClassLoader().getResource("fon.png"));
             for (int i = 0; i < 15; i++) {
                 try {
-                    mas[i] = ImageIO.read(new File("./k" + (i + 1) + ".png"));
+                    mas[i] = ImageIO.read(getClass().getClassLoader().getResource("k" + (i + 1) + ".png"));
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -143,8 +142,8 @@ public class Panel extends JPanel {
         timerUpdate = new Timer(500, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 int t = (int) (Math.random() * 4);
-                if ((t == 0) && (y > 0))//up
-                {
+
+                if ((t == 0) && (y > 0)) {
                     data[y][x] = data[y - 1][x];
                     data[y - 1][x] = 0;
                     y--;
@@ -172,13 +171,16 @@ public class Panel extends JPanel {
         super.paintComponent(gr);
         gr.drawImage(img, 0, 0, null);
         gr.setColor(Color.WHITE);
+
         for (int i = 0; i <= 4; i++) {
             gr.drawLine(10 + i * 70, 10, 10 + i * 70, 290);
             gr.drawLine(10, 10 + i * 70, 290, 10 + i * 70);
         }
+
         gr.setColor(Color.YELLOW);
         gr.setFont(new Font("arial", 0, 40));
         gr.drawString("Score: 0", 450, 300);
+
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 if (data[i][j] != 0) {
