@@ -3,9 +3,8 @@ package ru.shishkin.simplepuzzle;
 import javax.swing.*;
 import java.awt.*;
 
-public class Frame extends JFrame{
-    public Frame()
-    {
+public class Frame extends JFrame {
+    public Frame() {
         Panel np = new Panel();
         Container cont = getContentPane();
         cont.add(np);
