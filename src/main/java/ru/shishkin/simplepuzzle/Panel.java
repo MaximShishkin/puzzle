@@ -1,192 +1,191 @@
 package ru.shishkin.simplepuzzle;
 
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.Random;
+
+import javax.swing.JPanel;
 
 public class Panel extends JPanel {
-    private int x = 3, y = 3;
-    private int napr = 2;
-    private Image img;
-    private JButton btn1, btn2, btn3;
-    private Image[] mas = new Image[15];
-    private JLabel[] txt;
-    private int kol = 0;
-    private int l = 0;
-    private Timer timerUpdate;
-    private int[][] data = {
-            {1, 2, 3, 4},
-            {5, 6, 7, 8},
-            {9, 10, 11, 12},
-            {13, 14, 15, 0},
-    };
+    private int size;
+    private int nbTiles;
+    private int dimension;
+    private static final Color FOREGROUND_COLOR = new Color(239, 83, 80);
+    private static final Random RANDOM = new Random();
+    private int[] tiles;
+    private int tileSize;
+    private int blankPos;
+    private int margin;
+    private int gridSize;
+    private boolean gameOver;
 
-    public class myMouse1 implements MouseListener {
-        public void mouseClicked(MouseEvent e) {
-        }
+    public Panel(int size, int dim, int mar) {
+        this.size = size;
+        dimension = dim;
+        margin = mar;
 
-        public void mousePressed(MouseEvent e) {
-        }
+        nbTiles = size * size - 1;
+        tiles = new int[size * size];
 
-        public void mouseReleased(MouseEvent e) {
-            int tX = e.getX();
-            int tY = e.getY();
-            int k = 1;
-            
-            for (int i = 0; i < 4; i++) {
-                for (int j = 0; j < 4; j++) {
-                    if (tX == (10 + i * 70)) {
-                        if (tY == (10 + i * 70)) ;
+        gridSize = (dim - 2 * margin);
+        tileSize = gridSize / size;
+
+        setPreferredSize(new Dimension(dimension, dimension + margin));
+        setBackground(Color.WHITE);
+        setForeground(FOREGROUND_COLOR);
+        setFont(new Font("SansSerif", Font.BOLD, 60));
+
+        gameOver = true;
+
+        addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent e) {
+                if (gameOver) {
+                    newGame();
+                } else {
+                    int ex = e.getX() - margin;
+                    int ey = e.getY() - margin;
+
+                    if (ex < 0 || ex > gridSize || ey < 0 || ey > gridSize) return;
+
+                    int c1 = ex / tileSize;
+                    int r1 = ey / tileSize;
+
+                    int c2 = blankPos % size;
+                    int r2 = blankPos / size;
+
+                    int clickPos = r1 * size + c1;
+
+                    int dir = 0;
+
+                    if (c1 == c2 && Math.abs(r1 - r2) > 0)
+                        dir = (r1 - r2) > 0 ? size : -size;
+                    else if (r1 == r2 && Math.abs(c1 - c2) > 0)
+                        dir = (c1 - c2) > 0 ? 1 : -1;
+                    if (dir != 0) {
+                        do {
+                            int newBlankPos = blankPos + dir;
+                            tiles[blankPos] = tiles[newBlankPos];
+                            blankPos = newBlankPos;
+                        } while (blankPos != clickPos);
+
+                        tiles[blankPos] = 0;
                     }
+
+                    gameOver = isSolved();
                 }
-            }
-        }
 
-        public void mouseEntered(MouseEvent e) {
-        }
-
-        public void mouseExited(MouseEvent e) {
-        }
-    }
-
-    public class myMouse2 implements MouseMotionListener {
-        public void mouseDragged(MouseEvent e) {
-        }
-
-        public void mouseMoved(MouseEvent e) {
-        }
-    }
-
-    public Panel() {
-        setLayout(null);
-        btn1 = new JButton("START");
-        btn1.setForeground(Color.RED);
-        btn1.setBounds(500, 50, 100, 30);
-        btn1.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                timerUpdate.stop();
-                for (int i = 0; i < 10000; i++) {
-                    int t = (int) (Math.random() * 4);
-
-                    if ((t == 0) && (y > 0)) {
-                        data[y][x] = data[y - 1][x];
-                        data[y - 1][x] = 0;
-                        y--;
-                    }
-                    if ((t == 1) && (y < 3)) {
-                        data[y][x] = data[y + 1][x];
-                        data[y + 1][x] = 0;
-                        y++;
-                    }
-                    if ((t == 2) && (x > 0)) {
-                        data[y][x] = data[y][x - 1];
-                        data[y][x - 1] = 0;
-                        x--;
-                    }
-                    if ((t == 3) && (x < 3)) {
-                        data[y][x] = data[y][x + 1];
-                        data[y][x + 1] = 0;
-                        x++;
-                    }
-                }
-            }
-        });
-        add(btn1);
-
-        setLayout(null);
-        btn2 = new JButton("SLOW");
-        btn2.setForeground(Color.BLUE);
-        btn2.setBounds(500, 100, 100, 30);
-        btn2.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                timerUpdate.start();
-            }
-        });
-        add(btn2);
-
-        setLayout(null);
-        btn3 = new JButton("STOP");
-        btn3.setForeground(Color.GREEN);
-        btn3.setBounds(500, 150, 100, 30);
-        btn3.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                timerUpdate.stop();
-            }
-        });
-        add(btn3);
-
-        addMouseListener(new myMouse1());
-        addMouseMotionListener(new myMouse2());
-
-        try {
-            img = ImageIO.read(getClass().getClassLoader().getResource("fon.png"));
-            for (int i = 0; i < 15; i++) {
-                try {
-                    mas[i] = ImageIO.read(getClass().getClassLoader().getResource("k" + (i + 1) + ".png"));
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            }
-        } catch (Exception exp) {
-            exp.printStackTrace();
-        }
-
-        Timer nt = new Timer(25, new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
                 repaint();
             }
         });
-        nt.start();
 
-        timerUpdate = new Timer(500, new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                int t = (int) (Math.random() * 4);
-
-                if ((t == 0) && (y > 0)) {
-                    data[y][x] = data[y - 1][x];
-                    data[y - 1][x] = 0;
-                    y--;
-                }
-                if ((t == 1) && (y < 3)) {
-                    data[y][x] = data[y + 1][x];
-                    data[y + 1][x] = 0;
-                    y++;
-                }
-                if ((t == 2) && (x > 0)) {
-                    data[y][x] = data[y][x - 1];
-                    data[y][x - 1] = 0;
-                    x--;
-                }
-                if ((t == 3) && (x < 3)) {
-                    data[y][x] = data[y][x + 1];
-                    data[y][x + 1] = 0;
-                    x++;
-                }
-            }
-        });
+        newGame();
     }
 
-    public void paintComponent(Graphics gr) {
-        super.paintComponent(gr);
-        gr.drawImage(img, 0, 0, null);
-        gr.setColor(Color.WHITE);
+    private void newGame() {
+        do {
+            reset();
+            shuffle();
+        } while (!isSolvable());
 
-        for (int i = 0; i <= 4; i++) {
-            gr.drawLine(10 + i * 70, 10, 10 + i * 70, 290);
-            gr.drawLine(10, 10 + i * 70, 290, 10 + i * 70);
+        gameOver = false;
+    }
+
+    private void reset() {
+        for (int i = 0; i < tiles.length; i++) {
+            tiles[i] = (i + 1) % tiles.length;
         }
 
-        gr.setColor(Color.YELLOW);
-        gr.setFont(new Font("arial", 0, 40));
-        gr.drawString("Score: 0", 450, 300);
+        blankPos = tiles.length - 1;
+    }
 
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                if (data[i][j] != 0) {
-                    gr.drawImage(mas[data[i][j] - 1], 10 + j * 70, 10 + i * 70, null);
-                }
+    private void shuffle() {
+        int n = nbTiles;
+
+        while (n > 1) {
+            int r = RANDOM.nextInt(n--);
+            int tmp = tiles[r];
+            tiles[r] = tiles[n];
+            tiles[n] = tmp;
+        }
+    }
+
+    private boolean isSolvable() {
+        int countInversions = 0;
+
+        for (int i = 0; i < nbTiles; i++) {
+            for (int j = 0; j < i; j++) {
+                if (tiles[j] > tiles[i]) countInversions++;
             }
         }
+
+        return countInversions % 2 == 0;
+    }
+
+    private boolean isSolved() {
+        if (tiles[tiles.length - 1] != 0) return false;
+
+        for (int i = nbTiles - 1; i >= 0; i--) {
+            if (tiles[i] != i + 1) return false;
+        }
+
+        return true;
+    }
+
+    private void drawGrid(Graphics2D g) {
+        for (int i = 0; i < tiles.length; i++) {
+            int r = i / size;
+            int c = i % size;
+
+            int x = margin + c * tileSize;
+            int y = margin + r * tileSize;
+
+            if (tiles[i] == 0) {
+                if (gameOver) {
+                    g.setColor(FOREGROUND_COLOR);
+                    drawCenteredString(g, "\u2713", x, y);
+                }
+
+                continue;
+            }
+
+            g.setColor(getForeground());
+            g.fillRoundRect(x, y, tileSize, tileSize, 25, 25);
+            g.setColor(Color.BLACK);
+            g.drawRoundRect(x, y, tileSize, tileSize, 25, 25);
+            g.setColor(Color.WHITE);
+
+            drawCenteredString(g, String.valueOf(tiles[i]), x, y);
+        }
+    }
+
+    private void drawStartMessage(Graphics2D g) {
+        if (gameOver) {
+            g.setFont(getFont().deriveFont(Font.BOLD, 18));
+            g.setColor(FOREGROUND_COLOR);
+            String s = "Click to start new game";
+            g.drawString(s, (getWidth() - g.getFontMetrics().stringWidth(s)) / 2, getHeight() - margin);
+        }
+    }
+
+    private void drawCenteredString(Graphics2D g, String s, int x, int y) {
+        FontMetrics fm = g.getFontMetrics();
+        int asc = fm.getAscent();
+        int desc = fm.getDescent();
+        g.drawString(s, x + (tileSize - fm.stringWidth(s)) / 2, y + (asc + (tileSize - (asc + desc)) / 2));
+    }
+
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2D = (Graphics2D) g;
+        g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        drawGrid(g2D);
+        drawStartMessage(g2D);
     }
 }
