@@ -1,6 +1,6 @@
-package ru.shishkin.simplepuzzle;
+package ru.shishkin.maxim.puzzle;
 
-public class Application {
+public class App {
     public static void main(String[] args) {
         new Frame();
     }

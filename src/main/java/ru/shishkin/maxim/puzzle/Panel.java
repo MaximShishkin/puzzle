@@ -1,4 +1,4 @@
-package ru.shishkin.simplepuzzle;
+package ru.shishkin.maxim.puzzle;
 
 import java.awt.Color;
 import java.awt.Dimension;
